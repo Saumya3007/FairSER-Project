@@ -75,45 +75,31 @@ For direct inference, use `inference.py`. It supports single audio files, batche
 
 ## Project Summary
 
-### Fairness Metrics
-- **Macro F1**: 0.7589
-- **Weighted F1**: 0.7686
-- **Accuracy**: 0.7688
-- **Per-Class F1 Scores**:
-  - Angry: 0.8247
-  - Happy: 0.74
-  - Neutral: 0.6701
-  - Sad: 0.8008
-- **Language F1**:
-  - English: 0.7123
-  - Hindi: 0.8117
-- **Gender F1**:
-  - Female: 0.7138
-  - Male: 0.7099
+FairHindiSER is a speech emotion recognition pipeline built on **wav2vec2‑base** with staged adaptation (head‑only, LoRA, CLUES debiasing, gradual full unfreezing) and **AudioTrust** evaluation of fairness, robustness, explainability and privacy.
 
-### Robustness Metrics
-- **Clean Audio**: 0.7088
-- **Noise (20dB)**: 0.6224
-- **Noise (10dB)**: 0.4821
-- **Slow Speed**: 0.6881
+The model is trained on a **balanced 50/50 Hindi–English corpus** (IITKGP Hindi + IEMOCAP English, 4 emotions), and evaluated with group metrics across language, gender and accent.[file:50][file:58]
 
-### Model Comparisons
-- **Head-Only Fine-Tuning**:
-  - Macro F1: 0.5506
-  - Weighted F1: 0.5738
-  - Accuracy: 0.5979
-- **LoRA Fine-Tuning**:
-  - Macro F1: 0.6494
-  - Weighted F1: 0.6626
-  - Accuracy: 0.6677
-- **CLUES Debiasing**:
-  - Macro F1: 0.6515
-  - Weighted F1: 0.6697
-  - Accuracy: 0.6708
-- **Full Encoder Unfreezing**:
-  - Macro F1: 0.761
-  - Weighted F1: 0.7707
+---
 
+## 1. Features
+
+- SSL backbone: `facebook/wav2vec2-base` with masked‑mean pooling and a FairSER MLP head.[file:52]
+- Training stages:
+  - Stage 00 – Dataset pipeline (builds `train.csv`, `val.csv`, `test.csv`).[file:50]
+  - Stage 01 – Zero‑shot baseline (frozen SSL, random head).[file:43]
+  - Stage 02 – Head‑only fine‑tuning (SSL frozen).[file:44]
+  - Stage 02b – LoRA fine‑tuning (Q/V adapters, focal loss).[file:46][file:52]
+  - Stage 03 – CLUES contrastive debiasing on LoRA backbone.[file:47]
+  - Stage 03b – Optuna hyperparameter search.[file:51]
+  - Stage 04 – Gradual full‑encoder + CNN unfreezing.[file:45]
+  - Stage 05 – AudioTrust evaluation (fairness, robustness, explainability, privacy).[file:58][file:41]
+- Evaluation artefacts:
+  - Per‑class F1 and confusion matrix.
+  - Group F1 by language, gender, accent.
+  - Robustness curves under noise/speed/pitch perturbations.
+  - Calibration, confidence histograms, basic privacy proxies.[file:58][file:41]
+
+---
 
     
 ##  Project Structure
